@@ -1,0 +1,14 @@
+{
+  "name": "VNFundme",
+  "image": "mcr.microsoft.com/devcontainers/base:ubuntu",
+  "features": {
+    "ghcr.io/devcontainers/features/docker-outside-of-docker:1": {}
+  },
+  "forwardPorts": [8080, 3000, 9002, 9003],
+  "portsAttributes": {
+    "8080": { "label": "VNFundme frontend" },
+    "3000": { "label": "VNFundme backend" },
+    "9002": { "label": "MinIO API" },
+    "9003": { "label": "MinIO console" }
+  }
+}

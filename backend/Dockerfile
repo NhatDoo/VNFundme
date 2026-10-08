@@ -1,7 +1,6 @@
 FROM node:22-alpine
 
 WORKDIR /app
-ENV DATABASE_URL=postgresql://vnfundme:vnfundme_password@postgres:5432/vnfundme
 
 COPY package*.json ./
 RUN npm install
