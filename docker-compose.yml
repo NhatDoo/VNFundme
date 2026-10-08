@@ -46,6 +46,8 @@ services:
     depends_on:
       backend:
         condition: service_started
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     ports:
       - "${FRONTEND_PORT:-8080}:80"
 
