@@ -1,0 +1,19 @@
+.git-backups/
+.kilo/
+.qodo/
+
+# OS/editor noise
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+
+# Logs and local env
+*.log
+.env
+.env.local
+.env.*.local

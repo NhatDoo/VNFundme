@@ -1,0 +1,188 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Get a free hosted Postgres database in seconds: `npx create-db`
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+
+model User {
+  id        String     @id @default(uuid()) @db.Uuid
+  name      String
+  email     String     @unique
+  password  String
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+  phonenumber String   @unique
+  role      UserRole   @default(DONOR)
+  status    UserStatus @default(ACTIVE)
+  deletedAt DateTime?
+
+  campaigns Campaign[]
+  reviewedCampaigns Campaign[] @relation("CampaignReviewer")
+  donations Donation[]
+  fundUsageReports FundUsageReport[]
+}
+
+model Campaign {
+  id          String   @id @default(uuid()) @db.Uuid
+  title       String
+  description String
+
+  target      Decimal  @db.Decimal(15, 2)
+  current     Decimal  @default(0) @db.Decimal(15, 2)
+  status      CampaignStatus @default(PENDING_REVIEW)
+
+  creatorId   String   @db.Uuid
+  categoryId  String?  @db.Uuid
+  reviewerId  String?  @db.Uuid
+  reviewNote  String?
+  reviewedAt  DateTime?
+
+  creator     User     @relation(fields: [creatorId], references: [id])
+  reviewer    User?    @relation("CampaignReviewer", fields: [reviewerId], references: [id])
+  category    CampaignCategory? @relation(fields: [categoryId], references: [id])
+  donations   Donation[]
+  updates     CampaignUpdate[]
+  fundUsageReports FundUsageReport[]
+  images      CampaignImage[]
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model CampaignImage {
+  id         String   @id @default(uuid()) @db.Uuid
+  objectName String   @unique
+  mimeType   String
+  size       Int
+  position   Int
+  campaignId String   @db.Uuid
+  campaign   Campaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+  createdAt  DateTime @default(now())
+
+  @@unique([campaignId, position])
+  @@index([campaignId, position])
+}
+
+model CampaignCategory {
+  id          String     @id @default(uuid()) @db.Uuid
+  name        String     @unique
+  description String?
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+
+  campaigns   Campaign[]
+}
+
+model CampaignUpdate {
+  id         String   @id @default(uuid()) @db.Uuid
+  title      String
+  content    String
+  amountUsed Decimal? @db.Decimal(15, 2)
+
+  campaignId String   @db.Uuid
+  campaign   Campaign @relation(fields: [campaignId], references: [id])
+
+  createdAt  DateTime @default(now())
+}
+
+model FundUsageReport {
+  id          String   @id @default(uuid()) @db.Uuid
+  title       String
+  description String
+  amountUsed  Decimal  @db.Decimal(15, 2)
+  usedAt      DateTime
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  campaignId  String   @db.Uuid
+  createdById String   @db.Uuid
+  campaign    Campaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+  createdBy   User     @relation(fields: [createdById], references: [id])
+
+  @@index([campaignId, usedAt])
+}
+
+model Donation {
+  id          String   @id @default(uuid()) @db.Uuid
+  amount      Decimal  @db.Decimal(15, 2)
+
+  campaignId  String   @db.Uuid
+  donorId     String?  @db.Uuid
+
+  status      DonationStatus @default(PENDING)
+
+  campaign    Campaign @relation(fields: [campaignId], references: [id])
+  donor       User?    @relation(fields: [donorId], references: [id])
+
+  payment     Payment?
+
+  createdAt   DateTime @default(now())
+}
+
+model Payment {
+  id             String   @id @default(uuid()) @db.Uuid
+
+  donationId     String   @unique @db.Uuid
+  
+  provider       PaymentProvider @default(VNPAY)
+  reference      String   @unique
+  transactionId  String?  @unique
+  amount         Decimal @db.Decimal(15, 2)
+
+  status         PaymentStatus @default(PENDING)
+  responseCode   String?
+  bankCode       String?
+  paidAt         DateTime?
+
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  donation       Donation @relation(fields: [donationId], references: [id])
+}
+
+enum DonationStatus {
+  PENDING
+  SUCCESS
+  FAILED
+  CANCELLED
+}
+
+enum CampaignStatus {
+  DRAFT
+  PENDING_REVIEW
+  ACTIVE
+  REJECTED
+  COMPLETED
+  CANCELLED
+}
+
+enum PaymentStatus {
+  PENDING
+  SUCCESS
+  FAILED
+}
+
+enum PaymentProvider {
+  VNPAY
+}
+
+enum UserRole {
+  DONOR
+  ORGANIZER
+  ADMIN
+}
+
+enum UserStatus {
+  ACTIVE
+  LOCKED
+  DELETED
+}

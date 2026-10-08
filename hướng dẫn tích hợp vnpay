@@ -1,0 +1,132 @@
+đây là demo mẫu https://sandbox.vnpayment.vn/paymentv2/Transaction/PaymentMethod.html?token=299c291396bb4ad39ba1f88e329fbb1c
+
+Thông tin cấu hình
+Các thông tin cần thiết kết nối vào môi trường Sandbox Cổng thanh toán VNPAY:
+- Mã TmnCode vnp_TmnCode là mã định danh kết nối được khai báo tại hệ thống của VNPAY. Mã định danh tương ứng với tên miền website, ứng dụng, dịch vụ của merchant kết nối vào VNPAY. Mỗi đơn vị có thể có một hoặc nhiều mã TmnCode kết nối.
+- URL thanh toán (Sandbox): https://sandbox.vnpayment.vn/paymentv2/vpcpay.html
+- Secret Key vnp_HashSecret Chuỗi bí mật sử dụng để kiểm tra toàn vẹn dữ liệu khi hai hệ thống trao đổi thông tin (checksum).
+- URL truy vấn kết quả giao dịch - hoàn tiền (Sandbox): https://sandbox.vnpayment.vn/merchant_webapi/api/transaction
+
+Tạo URL Thanh toán
+URL thanh toán (Sandbox): https://sandbox.vnpayment.vn/paymentv2/vpcpay.html
+
+Phương thức: GET
+
+URL Thanh toán là địa chỉ URL mang thông tin thanh toán.
+Website TMĐT gửi sang Cổng thanh toán VNPAY các thông tin này khi xử lý giao dịch thanh toán trực tuyến cho Khách mua hàng.
+URL có dạng:
+https://sandbox.vnpayment.vn/paymentv2/vpcpay.html?vnp_Amount=1806000&vnp_Command=pay&vnp_CreateDate=20210801153333&vnp_CurrCode=VND&vnp_IpAddr=127.0.0.1&vnp_Locale=vn&vnp_OrderInfo=Thanh+toan+don+hang+%3A5&vnp_OrderType=other&vnp_ReturnUrl=https%3A%2F%2Fdomainmerchant.vn%2FReturnUrl&vnp_TmnCode=DEMOV210&vnp_TxnRef=5&vnp_Version=2.1.0&vnp_SecureHash=3e0d61a0c0534b2e36680b3f7277743e8784cc4e1d68fa7d276e79c23be7d6318d338b477910a27992f5057bb1582bd44bd82ae8009ffaf6d141219218625c42
+
+Danh sách tham số - Thông tin gửi sang VNPAY (vnp_Command=pay)
+Tham số	Kiểu dữ liệu	Bắt buộc/Tùy chọn	Mô tả
+vnp_Version	Alphanumeric[1,8]	Bắt buộc	Phiên bản api mà merchant kết nối. Phiên bản hiện tại là : 2.1.0
+vnp_Command	Alpha[1,16]	Bắt buộc	Mã API sử dụng, mã cho giao dịch thanh toán là: pay
+vnp_TmnCode	Alphanumeric[8]	Bắt buộc	Mã website của merchant trên hệ thống của VNPAY. Ví dụ: 2QXUI4J4
+vnp_Amount	Numeric[1,12]	Bắt buộc	Số tiền thanh toán. Số tiền không mang các ký tự phân tách thập phân, phần nghìn, ký tự tiền tệ. Để gửi số tiền thanh toán là 10,000 VND (mười nghìn VNĐ) thì merchant cần nhân thêm 100 lần (khử phần thập phân), sau đó gửi sang VNPAY là: 1000000
+vnp_BankCode	Alphanumeric[3,20]	Tùy chọn	Mã phương thức thanh toán, mã loại ngân hàng hoặc ví điện tử thanh toán.
+Nếu không gửi sang tham số này, chuyển hướng người dùng sang VNPAY chọn phương thức thanh toán.
+Lưu ý:
+Các mã loại hình thức thanh toán lựa chọn tại website-ứng dụng của merchant
+vnp_BankCode=VNPAYQRThanh toán quét mã QR
+vnp_BankCode=VNBANKThẻ ATM - Tài khoản ngân hàng nội địa
+vnp_BankCode=INTCARDThẻ thanh toán quốc tế
+vnp_CreateDate	Numeric[14]	Bắt buộc	Là thời gian phát sinh giao dịch định dạng yyyyMMddHHmmss (Time zone GMT+7) Ví dụ: 20220101103111
+vnp_CurrCode	Alpha[3]	Bắt buộc	Đơn vị tiền tệ sử dụng thanh toán. Hiện tại chỉ hỗ trợ VND
+vnp_IpAddr	Alphanumeric[7,45]	Bắt buộc	Địa chỉ IP của khách hàng thực hiện giao dịch. Ví dụ: 13.160.92.202
+vnp_Locale	Alpha[2,5]	Bắt buộc	Ngôn ngữ giao diện hiển thị. Hiện tại hỗ trợ Tiếng Việt (vn), Tiếng Anh (en)
+vnp_OrderInfo	Alphanumeric[1,255]	Bắt buộc	Thông tin mô tả nội dung thanh toán quy định dữ liệu gửi sang VNPAY (Tiếng Việt không dấu và không bao gồm các ký tự đặc biệt)
+Ví dụ: Nap tien cho thue bao 0123456789. So tien 100,000 VND
+vnp_OrderType	Alpha[1,100]	Bắt buộc	Mã danh mục hàng hóa. Mỗi hàng hóa sẽ thuộc một nhóm danh mục do VNPAY quy định. Xem thêm bảng Danh mục hàng hóa
+vnp_ReturnUrl	Alphanumeric[10,255]	Bắt buộc	URL thông báo kết quả giao dịch khi Khách hàng kết thúc thanh toán. Ví dụ: https://domain.vn/VnPayReturn
+vnp_ExpireDate	Numeric[14]	Bắt buộc	Thời gian hết hạn thanh toán GMT+7, định dạng: yyyyMMddHHmmss
+vnp_TxnRef	Alphanumeric[1,100]	Bắt buộc	Mã tham chiếu của giao dịch tại hệ thống của merchant. Mã này là duy nhất dùng để phân biệt các đơn hàng gửi sang VNPAY. Không được trùng lặp trong ngày. Ví dụ: 23554
+vnp_SecureHash	Alphanumeric[32,256]	Bắt buộc	Mã kiểm tra (checksum) để đảm bảo dữ liệu của giao dịch không bị thay đổi trong quá trình chuyển từ merchant sang VNPAY. Việc tạo ra mã này phụ thuộc vào cấu hình của merchant và phiên bản api sử dụng. Phiên bản hiện tại hỗ trợ SHA256, HMACSHA512.
+
+
+
+Lưu ý
+Dữ liệu checksum được thành lập dựa trên việc sắp xếp tăng dần của tên tham số (QueryString)
+Số tiền cần thanh toán nhân với 100 để triệt tiêu phần thập phân trước khi gửi sang VNPAY
+vnp_BankCode: Giá trị này tùy chọn.
+- Nếu loại bỏ tham số không gửi sang, khách hàng sẽ chọn phương thức thanh toán, ngân hàng thanh toán tại VNPAY.
+- Nếu thiết lập giá trị (chọn Ngân hàng thanh toán tại Website-ứng dụng TMĐT), Tham khảo bảng mã trả về tại API:
+Endpoint: https://sandbox.vnpayment.vn/qrpayauth/api/merchant/get_bank_list
+Http method: POST
+Content-Type: application/x-www-form-urlencoded
+key tmn_code
+value Theo mã định danh kết nối (vnp_TmnCode) VNPAY cung cấp
+Trong URL thanh toán có tham số vnp_ReturnUrl là URL thông báo kết quả giao dịch khi Khách hàng kết thúc thanh toán
+
+
+
+
+    router.post('/create_payment_url', function (req, res, next) {
+        var ipAddr = req.headers['x-forwarded-for'] ||
+            req.connection.remoteAddress ||
+            req.socket.remoteAddress ||
+            req.connection.socket.remoteAddress;
+    
+        var config = require('config');
+        var dateFormat = require('dateformat');
+    
+        
+        var tmnCode = config.get('vnp_TmnCode');
+        var secretKey = config.get('vnp_HashSecret');
+        var vnpUrl = config.get('vnp_Url');
+        var returnUrl = config.get('vnp_ReturnUrl');
+    
+        var date = new Date();
+    
+        var createDate = dateFormat(date, 'yyyymmddHHmmss');
+        var orderId = dateFormat(date, 'HHmmss');
+        var amount = req.body.amount;
+        var bankCode = req.body.bankCode;
+        
+        var orderInfo = req.body.orderDescription;
+        var orderType = req.body.orderType;
+        var locale = req.body.language;
+        if(locale === null || locale === ''){
+            locale = 'vn';
+        }
+        var currCode = 'VND';
+        var vnp_Params = {};
+        vnp_Params['vnp_Version'] = '2.1.0';
+        vnp_Params['vnp_Command'] = 'pay';
+        vnp_Params['vnp_TmnCode'] = tmnCode;
+        // vnp_Params['vnp_Merchant'] = ''
+        vnp_Params['vnp_Locale'] = locale;
+        vnp_Params['vnp_CurrCode'] = currCode;
+        vnp_Params['vnp_TxnRef'] = orderId;
+        vnp_Params['vnp_OrderInfo'] = orderInfo;
+        vnp_Params['vnp_OrderType'] = orderType;
+        vnp_Params['vnp_Amount'] = amount * 100;
+        vnp_Params['vnp_ReturnUrl'] = returnUrl;
+        vnp_Params['vnp_IpAddr'] = ipAddr;
+        vnp_Params['vnp_CreateDate'] = createDate;
+        if(bankCode !== null && bankCode !== ''){
+            vnp_Params['vnp_BankCode'] = bankCode;
+        }
+    
+        vnp_Params = sortObject(vnp_Params);
+    
+        var querystring = require('qs');
+        var signData = querystring.stringify(vnp_Params, { encode: false });
+        var crypto = require("crypto");     
+        var hmac = crypto.createHmac("sha512", secretKey);
+        var signed = hmac.update(new Buffer(signData, 'utf-8')).digest("hex"); 
+        vnp_Params['vnp_SecureHash'] = signed;
+        vnpUrl += '?' + querystring.stringify(vnp_Params, { encode: false });
+    
+        res.redirect(vnpUrl)
+    });
+    // Vui lòng tham khảo thêm tại code demo
+
+
+
+
+Thông tin cấu hình:
+Terminal ID / Mã Website (vnp_TmnCode): G704D1TJ
+
+Secret Key / Chuỗi bí mật tạo checksum (vnp_HashSecret): KUY8X1R8AZZ083AYV5Q8G0MYOKGK5U4M
+
+Url thanh toán môi trường TEST (vnp_Url): https://sandbox.vnpayment.vn/paymentv2/vpcpay.html

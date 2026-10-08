@@ -1,0 +1,5 @@
+-- CreateEnum
+CREATE TYPE "CampaignStatus" AS ENUM ('DRAFT', 'PENDING_REVIEW', 'ACTIVE', 'REJECTED', 'COMPLETED', 'CANCELLED');
+
+-- AlterTable
+ALTER TABLE "Campaign" ADD COLUMN "status" "CampaignStatus" NOT NULL DEFAULT 'PENDING_REVIEW';
