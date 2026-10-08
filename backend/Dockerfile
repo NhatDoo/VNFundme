@@ -11,7 +11,7 @@ COPY tsconfig*.json ./
 COPY nest-cli.json ./
 COPY src ./src
 
-RUN npx prisma generate
+RUN DATABASE_URL=postgresql://placeholder:placeholder@localhost:5432/placeholder npx prisma generate
 RUN npm run build
 
 EXPOSE 3000

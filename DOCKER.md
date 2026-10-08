@@ -15,7 +15,8 @@ cp .env.docker.example .env
 Set the real database URL, JWT secrets, and payment settings in
 `backend/.env`. Keep `MINIO_ROOT_USER` and `MINIO_ROOT_PASSWORD` in the root
 `.env` synchronized with `MINIO_ACCESS_KEY` and `MINIO_SECRET_KEY` in
-`backend/.env`.
+`backend/.env`. For local Docker, set `CORS_ORIGINS` and `FRONTEND_URL` in
+`backend/.env` to `http://localhost:8080`.
 
 ## GitHub Codespaces
 
