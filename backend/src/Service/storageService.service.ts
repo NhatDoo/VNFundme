@@ -2,6 +2,7 @@ import {
   BadRequestException,
   Injectable,
   InternalServerErrorException,
+  Logger,
 } from '@nestjs/common';
 import { Client } from 'minio';
 
@@ -20,6 +21,7 @@ const publicReadPolicy = (bucket: string) =>
 
 @Injectable()
 export class StorageService {
+  private readonly logger = new Logger(StorageService.name);
   private readonly bucket = process.env.MINIO_BUCKET ?? 'image';
   private readonly endpoint = process.env.MINIO_ENDPOINT ?? 'localhost';
   private readonly port = Number(process.env.MINIO_PORT ?? '9000');
@@ -46,7 +48,8 @@ export class StorageService {
       await this.client.putObject(this.bucket, objectName, file.buffer, file.size, {
         'Content-Type': file.mimetype,
       });
-    } catch {
+    } catch (error) {
+      this.logStorageError('upload campaign image', error);
       throw new InternalServerErrorException('Could not upload campaign image');
     }
   }
@@ -73,7 +76,8 @@ export class StorageService {
         await this.client.putObject(this.bucket, objectName, file.buffer, file.size, {
           'Content-Type': file.mimetype,
         });
-      } catch {
+      } catch (error) {
+        this.logStorageError('upload campaign images', error);
         throw new InternalServerErrorException('Could not upload campaign image');
       }
     }
@@ -83,7 +87,8 @@ export class StorageService {
     await this.ensurePublicBucket();
     try {
       await this.client.removeObject(this.bucket, objectName);
-    } catch {
+    } catch (error) {
+      this.logStorageError('remove campaign image', error);
       throw new InternalServerErrorException('Could not remove campaign image');
     }
   }
@@ -93,8 +98,8 @@ export class StorageService {
     for (const objectName of objectNames) {
       try {
         await this.client.removeObject(this.bucket, objectName);
-      } catch {
-        // Continue deleting other images even if one fails
+      } catch (error) {
+        this.logStorageError('clean up campaign image', error);
       }
     }
   }
@@ -115,8 +120,14 @@ export class StorageService {
       }
       await this.client.setBucketPolicy(this.bucket, publicReadPolicy(this.bucket));
       this.bucketReady = true;
-    } catch {
+    } catch (error) {
+      this.logStorageError('initialize image storage bucket', error);
       throw new InternalServerErrorException('Could not connect to image storage');
     }
+  }
+
+  private logStorageError(operation: string, error: unknown): void {
+    const details = error instanceof Error ? error.stack : String(error);
+    this.logger.error(`Failed to ${operation}: ${details}`);
   }
 }

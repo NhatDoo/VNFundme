@@ -12,3 +12,10 @@ export class ChangePasswordDTO {
   @MinLength(15)
   newPassword: string;
 }
+
+export class AdminResetPasswordDTO {
+  @ApiProperty({ example: 'NewStrongPassword123' })
+  @IsNotEmpty()
+  @MinLength(8)
+  newPassword: string;
+}

@@ -6,6 +6,7 @@ interface UserTableProps {
   users: User[];
   currentUserId?: string;
   onRoleChange: (id: string, role: Role) => void;
+  onPasswordChange: (user: User) => void;
   onLock: (id: string) => void;
   onUnlock: (id: string) => void;
   onDelete: (id: string) => void;
@@ -15,6 +16,7 @@ export function UserTable({
   users,
   currentUserId,
   onRoleChange,
+  onPasswordChange,
   onLock,
   onUnlock,
   onDelete,
@@ -66,6 +68,12 @@ export function UserTable({
                 <td>{dateTime(user.createdAt)}</td>
                 <td>
                   <div className="user-actions">
+                    <button
+                      className="link"
+                      onClick={() => onPasswordChange(user)}
+                    >
+                      Đổi mật khẩu
+                    </button>
                     {user.status === "ACTIVE" ? (
                       <button
                         className="link"

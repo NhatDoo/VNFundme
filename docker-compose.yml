@@ -1,23 +1,29 @@
 services:
   minio:
-    image: quay.io/minio/aistor/minio
+    image: rustfs/rustfs:1.0.0
     container_name: vnfundme-minio
     restart: unless-stopped
-    command: server /data --console-address ":9001"
     environment:
-      MINIO_ROOT_USER: ${MINIO_ROOT_USER:-minioadmin}
-      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD:-minioadmin}
+      RUSTFS_VOLUMES: /data/rustfs0
+      RUSTFS_ADDRESS: 0.0.0.0:9000
+      RUSTFS_CONSOLE_ADDRESS: 0.0.0.0:9001
+      RUSTFS_CONSOLE_ENABLE: "true"
+      RUSTFS_CONSOLE_CORS_ALLOWED_ORIGINS: "*"
+      RUSTFS_ACCESS_KEY: ${MINIO_ROOT_USER:-minioadmin}
+      RUSTFS_SECRET_KEY: ${MINIO_ROOT_PASSWORD:-minioadmin}
+      RUSTFS_OBS_LOGGER_LEVEL: info
     ports:
       - "${MINIO_HOST_PORT:-9002}:9000"
       - "${MINIO_CONSOLE_PORT:-9003}:9001"
     volumes:
-      - minio_data:/data
+      - rustfs_data:/data
 
   backend:
     build:
       context: ./backend
     container_name: vnfundme-backend
     restart: unless-stopped
+    network_mode: host
     env_file:
       - ./backend/.env
     depends_on:
@@ -26,21 +32,19 @@ services:
     environment:
       NODE_ENV: production
       PORT: 3000
-      MINIO_ENDPOINT: minio
-      MINIO_PORT: 9000
+      MINIO_ENDPOINT: 127.0.0.1
+      MINIO_PORT: 9002
       MINIO_USE_SSL: "false"
       MINIO_ACCESS_KEY: ${MINIO_ROOT_USER:-minioadmin}
       MINIO_SECRET_KEY: ${MINIO_ROOT_PASSWORD:-minioadmin}
       MINIO_BUCKET: ${MINIO_BUCKET:-image}
-      MINIO_PUBLIC_URL: ${MINIO_PUBLIC_URL:-http://localhost:9002}
-    ports:
-      - "${BACKEND_PORT:-3000}:3000"
+      MINIO_PUBLIC_URL: ${MINIO_PUBLIC_URL:-/storage}
 
   frontend:
     build:
       context: ./frontend
       args:
-        VITE_API_URL: ${VITE_API_URL:-http://localhost:3000}
+        VITE_API_URL: ${VITE_API_URL:-/api}
     container_name: vnfundme-frontend
     restart: unless-stopped
     depends_on:
@@ -52,4 +56,7 @@ services:
       - "${FRONTEND_PORT:-8080}:80"
 
 volumes:
+  # Retained so the previous AIStor data volume is not removed during migration.
   minio_data:
+    name: vnfundme_minio_data
+  rustfs_data:

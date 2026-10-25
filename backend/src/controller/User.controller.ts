@@ -12,7 +12,10 @@ import {
 } from '@nestjs/common';
 import { RegisterDTO } from '../DTO/request/registerDTO.js';
 import { LoginDTO } from '../DTO/request/loginDTO.js';
-import { ChangePasswordDTO } from '../DTO/request/changePasswordDTO.js';
+import {
+  AdminResetPasswordDTO,
+  ChangePasswordDTO,
+} from '../DTO/request/changePasswordDTO.js';
 import { ChangeProfileDTO } from '../DTO/request/changeProfileDTO.js';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { ListUsersQueryDTO, UpdateUserRoleDTO } from '../DTO/request/userDTO.js';
@@ -104,6 +107,17 @@ export class UserController {
     @Body() updateUserRoleDTO: UpdateUserRoleDTO,
   ): Promise<any> {
     return this.userService.updateRole(id, updateUserRoleDTO.role);
+  }
+
+  @Patch('admin/:id/password')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.ADMIN)
+  @ApiBearerAuth('access-token')
+  resetPassword(
+    @Param('id') id: string,
+    @Body() resetPasswordDTO: AdminResetPasswordDTO,
+  ): Promise<any> {
+    return this.userService.adminResetPassword(id, resetPasswordDTO.newPassword);
   }
 
   @Patch('admin/:id/lock')

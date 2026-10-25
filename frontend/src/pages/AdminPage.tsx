@@ -17,6 +17,7 @@ import { UserTable } from "../components/UserTable";
 import { CreateUserModal } from "../components/CreateUserModal";
 import { AdminCampaignTable } from "../components/AdminCampaignTable";
 import { ReviewCampaignModal } from "../components/ReviewCampaignModal";
+import { AdminResetPasswordModal } from "../components/AdminResetPasswordModal";
 import { AdminAnalytics } from "../components/AnalyticsCharts";
 import type { Payment, User, Role, AdminCampaign } from "../api";
 
@@ -37,6 +38,7 @@ export function AdminPage({ token, onNotice }: AdminPageProps) {
   const [payments, setPayments] = useState<Payment[]>([]);
   const [users, setUsers] = useState<User[]>([]);
   const [showCreateUser, setShowCreateUser] = useState(false);
+  const [passwordResetUser, setPasswordResetUser] = useState<User | null>(null);
   const [userSearch, setUserSearch] = useState("");
   const [userRoleFilter, setUserRoleFilter] = useState<string>("");
 
@@ -274,6 +276,7 @@ export function AdminPage({ token, onNotice }: AdminPageProps) {
         <UserTable
           users={users}
           onRoleChange={handleRoleChange}
+          onPasswordChange={setPasswordResetUser}
           onLock={handleLock}
           onUnlock={handleUnlock}
           onDelete={handleDelete}
@@ -302,6 +305,15 @@ export function AdminPage({ token, onNotice }: AdminPageProps) {
           onClose={() => setReviewModal(null)}
           onSubmit={handleReviewSubmit}
           busy={reviewBusy}
+        />
+      )}
+
+      {passwordResetUser && (
+        <AdminResetPasswordModal
+          user={passwordResetUser}
+          token={token}
+          onClose={() => setPasswordResetUser(null)}
+          onNotice={onNotice}
         />
       )}
     </section>

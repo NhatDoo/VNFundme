@@ -47,6 +47,26 @@ describe('CampaignService', () => {
     expect(prisma.campaign.update).not.toHaveBeenCalled();
   });
 
+  it('only allows the campaign owner to edit a campaign', async () => {
+    const prisma = {
+      campaign: {
+        findUnique: vi.fn().mockResolvedValue({ creatorId: 'another-organizer' }),
+        update: vi.fn(),
+      },
+    };
+    const service = new CampaignService(prisma as never, {} as never);
+
+    await expect(
+      service.update(
+        'campaign-1',
+        { id: 'organizer-1', email: 'organizer@example.com', role: 'ORGANIZER' },
+        { title: 'Updated title' },
+      ),
+    ).rejects.toThrow('You cannot manage this campaign');
+
+    expect(prisma.campaign.update).not.toHaveBeenCalled();
+  });
+
   it('clears the prior review when an owner resubmits a rejected campaign', async () => {
     const prisma = {
       campaign: {

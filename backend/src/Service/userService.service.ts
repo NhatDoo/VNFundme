@@ -198,6 +198,17 @@ export class UserService {
     });
   }
 
+  async adminResetPassword(id: string, newPassword: string): Promise<any> {
+    await this.ensureUserExists(id);
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+
+    return this.prismaService.user.update({
+      where: { id },
+      data: { password: hashedPassword },
+      select: publicUserSelect,
+    });
+  }
+
   async lock(id: string): Promise<any> {
     await this.ensureUserExists(id);
     return this.updateStatus(id, UserStatus.LOCKED);

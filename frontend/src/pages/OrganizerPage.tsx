@@ -3,6 +3,7 @@ import { BarChart3, Heart, Plus, WalletCards } from "lucide-react";
 
 import { api } from "../api";
 import { CreateCampaignModal } from "../components/CreateCampaignModal";
+import { EditCampaignModal } from "../components/EditCampaignModal";
 import { SectionHeader, StatCard } from "../components/SectionHeader";
 import { CampaignTable } from "../components/Tables";
 import { OrganizerAnalytics } from "../components/AnalyticsCharts";
@@ -29,6 +30,7 @@ export function OrganizerPage({
   const [dashboard, setDashboard] = useState<OrganizerDashboard | null>(null);
   const [campaigns, setCampaigns] = useState<Campaign[]>([]);
   const [showCreate, setShowCreate] = useState(false);
+  const [campaignToEdit, setCampaignToEdit] = useState<Campaign | null>(null);
 
   const load = useCallback(async () => {
     try {
@@ -84,13 +86,26 @@ export function OrganizerPage({
 
       <OrganizerAnalytics campaigns={campaigns} />
 
-      <CampaignTable items={campaigns} />
+      <CampaignTable items={campaigns} onEdit={setCampaignToEdit} />
       {showCreate && (
         <CreateCampaignModal
           token={token}
           onClose={() => setShowCreate(false)}
           onCreated={() => {
             setShowCreate(false);
+            onRefresh();
+            void load();
+          }}
+          onNotice={onNotice}
+        />
+      )}
+      {campaignToEdit && (
+        <EditCampaignModal
+          campaign={campaignToEdit}
+          token={token}
+          onClose={() => setCampaignToEdit(null)}
+          onUpdated={() => {
+            setCampaignToEdit(null);
             onRefresh();
             void load();
           }}

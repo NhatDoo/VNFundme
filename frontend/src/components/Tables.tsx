@@ -2,7 +2,13 @@ import { dateTime, money } from "../api";
 import type { Campaign, Payment } from "../api";
 import { Status } from "./Status";
 
-export function CampaignTable({ items }: { items: Campaign[] }) {
+export function CampaignTable({
+  items,
+  onEdit,
+}: {
+  items: Campaign[];
+  onEdit: (campaign: Campaign) => void;
+}) {
   return (
     <div className="table-wrap">
       <table>
@@ -12,6 +18,7 @@ export function CampaignTable({ items }: { items: Campaign[] }) {
             <th>Trang thai</th>
             <th>Da nhan</th>
             <th>Muc tieu</th>
+            <th>Thao tac</th>
           </tr>
         </thead>
         <tbody>
@@ -24,11 +31,20 @@ export function CampaignTable({ items }: { items: Campaign[] }) {
                 </td>
                 <td>{money(item.current)}</td>
                 <td>{money(item.target)}</td>
+                <td>
+                  <button
+                    className="link"
+                    type="button"
+                    onClick={() => onEdit(item)}
+                  >
+                    Chỉnh sửa
+                  </button>
+                </td>
               </tr>
             ))
           ) : (
             <tr>
-              <td colSpan={4}>Chua co chien dich.</td>
+              <td colSpan={5}>Chua co chien dich.</td>
             </tr>
           )}
         </tbody>
